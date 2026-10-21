@@ -1,14 +1,36 @@
 import { Link, useParams } from "react-router-dom"
-import products from "../data/products.json"
+import { useState, useEffect } from "react"
+import { getProduct } from "../api/product.js"
 import { useCart } from "../context/CartContext.jsx"
 
 function ProductDetails() {
   const { addToCart } = useCart()
   const { id } = useParams()
+  const [product, setProduct] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const product = products.find(
-    (item) => item.id === Number(id)
-  )
+  useEffect(() => {
+    getProduct(id)
+      .then((data) => {
+        setProduct(data)
+      })
+      .catch((error) => {
+        setError(error.message)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+    }, [id])
+
+
+  if (loading) {
+    return <p>Loading product...</p>
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>
+  }
 
   if (!product) {
     return (
